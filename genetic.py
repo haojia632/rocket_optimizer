@@ -45,15 +45,16 @@ class Rocket(object):
 
     # Function that determines the fitness of the Rocket
     def evaulate_fitness(self):
-        self.fitness = sum(self.genes)
+        # self.fitness = sum(self.genes)
+        self.fitness = rocket_utils.calc_total_deltav(self.genes)
 
     # Randomly mutate one 'gene' sequence
     def mutate(self):
         rand_int = randint(0, len(self.genes) - 1)
-        # If odd, is engine type
-        if rand_int % 2 != 0:
+        # If even, is engine type
+        if rand_int % 2 == 0:
             self.genes[rand_int] = random_engine()
-        # if even, fuel tank size
+        # if odd, fuel tank size
         else:
             self.genes[rand_int] = random_fuel()
 
@@ -197,9 +198,9 @@ class RocketOptimizer(GeneticOptimizer):
 
     def create_random_rocket(self):
         return Rocket([
-            random_fuel(), random_engine(),
-            random_fuel(), random_engine(),
-            random_fuel(), random_engine(),
+            random_engine(), random_fuel(),
+            random_engine(), random_fuel(),
+            random_engine(), random_fuel(),
         ])
 
     def end_point_reached(self):
@@ -244,12 +245,12 @@ class RocketOptimizer(GeneticOptimizer):
     def log_results(self):
         self.fitness_history.append([
             self.average_fitness(),
-            self.max_fitness(),
-            self.min_fitness()
+            # self.max_fitness(),
+            # self.min_fitness()
         ])
 
         # Every so many generations display the progress
-        if self.current_generation % 200 == 0:
+        if self.current_generation % 500 == 0:
             self.display_progress()
 
     # Displays current generation # and estimated time remaining
@@ -303,9 +304,9 @@ if __name__ == "__main__":
     optimizer = RocketOptimizer()
 
     config = {
-        'population_size': 50,
-        'max_generations': 400,
-        'num_fittest': 50,
+        'population_size': 150,
+        'max_generations': 2000,
+        'num_fittest': 20,
         'mutation_ratio': 1000,
         'mutation_threshold': 1,
     }
@@ -319,14 +320,14 @@ if __name__ == "__main__":
     #     optimizer.save_log()
     #     optimizer.reset()
 
-    # 25-500
-    for x in range(1, 21):
-        config['num_fittest'] = int(((x * 5) / 100.0) * optimizer.population_size)
-        optimizer.init_from_config(config)
-        optimizer.run_optimizer()
-        optimizer.plot()
-        optimizer.save_log()
-        optimizer.reset()
+    # # 25-500
+    # for x in range(1, 21):
+    #     config['num_fittest'] = int(((x * 5) / 100.0) * optimizer.population_size)
+    #     optimizer.init_from_config(config)
+    #     optimizer.run_optimizer()
+    #     optimizer.plot()
+    #     optimizer.save_log()
+    #     optimizer.reset()
 
     # # 490-498
     # for x in range(245, 250):
@@ -336,3 +337,10 @@ if __name__ == "__main__":
     #     optimizer.plot()
     #     optimizer.save_log()
     #     optimizer.reset()
+
+    optimizer.init_from_config(config)
+    optimizer.run_optimizer()
+    optimizer.save_log()
+    for rocket in optimizer.population:
+        print(rocket.genes)
+    optimizer.plot()
